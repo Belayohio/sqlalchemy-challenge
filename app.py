@@ -159,8 +159,7 @@ def start_end(start,end):
         end_start_dict['avg_temp'] = avg
         end_start_all_station.append( end_start_dict)
     return jsonify(end_start_all_station)
+    
 session.close()
 if __name__ == '__main__':
             app.run(debug=True)
-else:
-    f'error:please insert a date between{start} and {end}'          
