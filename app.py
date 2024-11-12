@@ -20,26 +20,29 @@ Station = Base.classes.station
 session = Session(bind=engine)
 # create Flask app
 app = Flask(__name__)
+#Start and end date
+start = "2017-08-18"
+end =  "2016-08-18"
 #Start at the homepage.
-
 @app.route("/")
 def home():
-    print( " redirecting to the list of available route!")
+    print( " server requesting...")
     #List all the available routes.
     return (
          'here is the available route <br>'
+         "Note:<br>"
+         'Please input you start date after slash 2017-08-18<br> '
+         'please input your end date bellow after slash 2016-08-18<br>'
+         'please input your start and end date between and after slash <br>'
+
             '/api/v1.0/precipitation<br>'
             '/api/v1.0/stations <br>'
             '/api/v1.0/tobs<br>'
-            'Please input you start date after slash 2017-08-18<br> '
-             '/api/v1.0/<start><br>'
-
-             'please input your end date bellow after slash 2016-08-18<br>'
-            '/api/v1.0/<end><br>'
-
-            'please input your start and end date between and after slash <br>'
-            '/api/v1.0/<start>/<end><br>'
+             "/api/v1.0/'insert start date here'<br>"
+            "/api/v1.0/'insert end date here'<br>"
+            "/api/v1.0/'insert start date here'/'insert end date here'<br>"
             )
+            # preciptation
 session.close()
 @app.route("/api/v1.0/precipitation")
 def preciptation():
@@ -52,7 +55,7 @@ def preciptation():
     prcp_data = session.query(Measurement.date,Measurement.prcp).filter(Measurement.date < most_recent_date).\
                                 filter(Measurement.date >=last12_month).all()
 
-# Save the query results as a Pandas DataFrame. Explicitly set the column names
+
     date_preciptation = []
   
     for date,prcp in prcp_data:
@@ -65,6 +68,7 @@ def preciptation():
      #Return the JSON representation of your dictionar
     return jsonify( date_preciptation)
 session.close()  
+#stations
 
 @app.route("/api/v1.0/stations")
 def stations():
@@ -98,17 +102,17 @@ def tobs():
          temp_dict["Temprature"]=tobs
          temp_dict["Station"]='USC00519281'
          temp_list.append(temp_dict)
-    # converting to normal list from tuple:
+    
     
     
     return jsonify(temp_list)
 session.close()
 
-
+# start date
 @app.route("/api/v1.0/<start>")
 def start_date(start):
     session=Session(bind=engine)
-    start = "2017-08-18"
+   
     start_temp=(session.query(Measurement.station,func.min(Measurement.tobs),func.max(Measurement.tobs),func.avg(Measurement.tobs)).\
                                 filter(Measurement.date < start).group_by(Measurement.station).all())
     tobs_all_station = []
@@ -122,11 +126,11 @@ def start_date(start):
     
     return jsonify(tobs_all_station)
 session.close()
-
+# end date
 @app.route("/api/v1.0/<end>")
 def end_date():
     session=Session(bind=engine)
-    end =  "2016-08-18"
+    
     end_temp=session.query(Measurement.station,func.min(Measurement.tobs),func.max(Measurement.tobs),func.avg(Measurement.tobs)).\
                         filter(Measurement.date > end).group_by(Measurement.station).all()
     end_all_station = []
@@ -138,12 +142,12 @@ def end_date():
         station_dict['avg_temp'] = avg
         end_all_station.append(station_dict)
     return jsonify(end_all_station)
+    #start and end date
    
 @app.route("/api/v1.0/<start>/<end>")
 def start_end(start,end):
     session=Session(engine)
-    start = "2017-08-18"
-    end =  "2016-08-18"
+   
     start_end_temp=session.query(Measurement.station,func.min(Measurement.tobs),func.max(Measurement.tobs),func.avg(Measurement.tobs)).\
                                     filter(Measurement.date < start).filter(Measurement.date >= end).group_by(Measurement.station).all()
     end_start_all_station = []
@@ -158,3 +162,5 @@ def start_end(start,end):
 session.close()
 if __name__ == '__main__':
             app.run(debug=True)
+else:
+    f'error:please insert a date between{start} and {end}'          
